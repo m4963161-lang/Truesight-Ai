@@ -1,8 +1,9 @@
-from flask_cors import CORS
+
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 import os
+from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
@@ -134,4 +135,5 @@ def uploaded_file(filename):
     return send_from_directory('uploads', filename)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)
+
