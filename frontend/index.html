@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TrueSight AI</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial;
+        }
+
+        button {
+            background: linear-gradient(45deg, #4f46e5, #22c55e);
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        #uploadSection,
+        #historySection,
+        #analyticsSection {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px;
+        }
+    </style>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            background: #0f172a;
+            color: white;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #020617;
+            height: 100vh;
+            padding: 20px;
+            border-right: 1px solid #1e293b;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: transparent;
+            border: 1px solid #1e293b;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .sidebar button:hover {
+            background: #1e293b;
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #6366f1, #22c55e);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 15px;
+            font-size: 16px;
+        }
+
+        img {
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">🚀 TrueSight AI</div>
+
+        <button onclick="showSection('upload')">Upload</button>
+        <button onclick="showSection('history')">History</button>
+        <button onclick="showSection('analytics')">Analytics</button>
+        <button onclick="payNow()">Upgrade 💎</button>
+    </div>
+
+    <!-- Main -->
+    <div class="main" id="content">
+        <div class="card">
+            <div id="loginSection">
+                <h2>Login</h2>
+
+                <input placeholder="Username">
+                <input type="password" placeholder="Password">
+
+                <button onclick="login()">Login</button>
+                <button onclick="signup()">Signup</button>
+            </div>
+        </div>
+        <div id="uploadSection">
+            <div class="card">
+                <div id="homeSection" style="display:none;">
+
+                    <h2>Upload Image</h2>
+                    <input type="file" id="fileInput" name="file">
+                    <button onclick="analyzeImage()">Analyze</button>
+                    <div id="result"></div>
+                </div>
+
+                <div id="historySection" style="display:none;"></div>
+
+                <div id="analyticsSection" style="display:none;">
+                    <h2>Analytics Dashboard 📊</h2>
+                    <canvas id="chart" width="400" height="200"></canvas>
+                </div>
+
+                <br>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 🚫 Prevent using app without login
+        if (!localStorage.getItem("username")) {
+            alert("Login required 🔐");
+            return;
+        }
+
+    </script>
+
+    <script>
+
+        // Preview Image
+        document.getElementById("fileInput").onchange = function () {
+            let file = this.files[0];
+            let reader = new FileReader();
+
+            reader.onload = function (e) {
+                document.getElementById("preview").src = e.target.result;
+            }
+
+            reader.readAsDataURL(file);
+        }
+
+        // Upload Image
+        async function uploadImage() {
+
+            let file = document.getElementById("fileInput").files[0];
+
+            let formData = new FormData();
+            formData.append("file", file);
+
+            let res = await fetch("http://127.0.0.1:5000/detect_image", {
+                method: "POST",
+                body: formData
+            });
+
+            let data = await res.json();
+
+            document.getElementById("result").innerHTML = `
+            <b>Prediction:</b> ${data.prediction} <br>
+            <b>Confidence:</b> ${data.confidence}
+        `;
+        }
+
+        // Load History
+        async function loadHistory() {
+
+            let res = await fetch("http://127.0.0.1:5000/history");
+            let data = await res.json();
+
+            let html = "<div class='card'><h2>History</h2>";
+
+            data.forEach(item => {
+                html += `
+            <div style="margin-bottom:20px;">
+                <img src="http://127.0.0.1:5000/uploads/${item.filename}" width="150"><br>
+                <b>${item.filename}</b><br>
+                ${item.prediction} (${item.confidence})
+            </div>
+            `;
+            });
+
+            html += "</div>";
+
+            document.getElementById("content").innerHTML = html;
+        }
+
+        function showUpload() {
+            location.reload();
+        }
+
+        async function login() {
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+
+            let res = await fetch("http://127.0.0.1:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            let data = await res.json();
+            alert(data.message);
+        }
+
+        async function loadStats() {
+
+            let res = await fetch("http://127.0.0.1:5000/stats");
+            let data = await res.json();
+
+            let html = `
+    <div class="card">
+        <h2>Analytics</h2>
+        <p>Total: ${data.total}</p>
+        <p>Real: ${data.real}</p>
+        <p>Fake: ${data.fake}</p>
+    </div>
+    `;
+
+            document.getElementById("content").innerHTML = html;
+        }
+
+
+
+    </script>
+    <script>
+        function signup() {
+            const username = document.querySelector("input[placeholder='Username']").value;
+            const password = document.querySelector("input[placeholder='Password']").value;
+
+            fetch("http://127.0.0.1:5000/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    console.log(data);
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Signup failed");
+                });
+        }
+    </script>
+
+    <script>
+        function login() {
+            const username = document.querySelector("input[placeholder='Username']").value;
+            const password = document.querySelector("input[placeholder='Password']").value;
+
+            fetch("http://127.0.0.1:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+
+                        // ✅ store login
+                        localStorage.setItem("loggedIn", "true");
+                        localStorage.setItem("user", username);
+
+                        localStorage.setItem("plan", data.plan);
+                        localStorage.setItem("credits", data.credits);
+
+                        // ✅ SWITCH TO HOME UI (no redirect)
+                        showHome();
+
+                    } else {
+                        alert("Invalid credentials ❌");
+                    }
+                });
+        }
+
+        function analyzeImage() {
+            if (!localStorage.getItem("loggedIn")) {
+                alert("Login required 🔐");
+                return;
+            }
+
+            // existing code...
+        }
+    </script>
+
+
+    </script>
+    <script>
+        function showHome() {
+            document.getElementById("loginSection").style.display = "none";
+            document.getElementById("homeSection").style.display = "block";
+        }
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        window.onload = function () {
+            if (localStorage.getItem("loggedIn")) {
+                showHome();
+            }
+        };
+
+    </script>
+
+    <script>
+        function analyzeImage() {
+
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a file");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("username", localStorage.getItem("username"));
+
+            fetch("http://127.0.0.1:5000/detect_image", {
+                method: "POST",
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    document.getElementById("result").innerHTML =
+                        `Prediction: ${data.prediction} <br> Confidence: ${data.confidence}`;
+                })
+                .catch(err => {
+                    alert("Error analyzing image ❌");
+                    console.log(err);
+                });
+        }
+
+    </script>
+
+    <script>
+        function showSection(section) {
+            document.getElementById("uploadSection").style.display = "none";
+            document.getElementById("historySection").style.display = "none";
+            document.getElementById("analyticsSection").style.display = "none";
+
+            if (section === "upload") {
+                document.getElementById("uploadSection").style.display = "block";
+            }
+
+            if (section === "history") {
+                document.getElementById("historySection").style.display = "block";
+                loadHistory();
+            }
+
+            if (section === "analytics") {
+                document.getElementById("analyticsSection").style.display = "block";
+                loadAnalytics();
+            }
+        }
+    </script>
+
+    <script>
+        function loadAnalytics() {
+            fetch("http://127.0.0.1:5000/history")
+                .then(res => res.json())
+                .then(data => {
+
+                    let real = 0;
+                    let fake = 0;
+
+                    data.forEach(item => {
+                        if (item.prediction === "REAL") real++;
+                        else fake++;
+                    });
+
+                    const ctx = document.getElementById("chart");
+
+                    new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels: ["REAL", "FAKE"],
+                            datasets: [{
+                                label: "Predictions",
+                                data: [real, fake]
+                            }]
+                        }
+                    });
+                });
+        }
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+
+        function payNow() {
+            var options = {
+                key: "YOUR_KEY",
+                amount: 50000,
+                currency: "INR",
+                name: "TrueSight AI",
+                description: "Premium Plan",
+                handler: function () {
+                    alert("Payment Successful 🎉");
+                }
+            };
+
+            var rzp = new Razorpay(options);
+            rzp.open();
+        }
+
+        function showSection(section) {
+            document.getElementById("uploadSection").style.display = "none";
+            document.getElementById("historySection").style.display = "none";
+            document.getElementById("analyticsSection").style.display = "none";
+
+            if (section === "upload") {
+                document.getElementById("uploadSection").style.display = "block";
+            }
+            else if (section === "history") {
+                document.getElementById("historySection").style.display = "block";
+                loadHistory(); // optional
+            }
+            else if (section === "analytics") {
+                document.getElementById("analyticsSection").style.display = "block";
+                loadAnalytics(); // optional
+            }
+        }
+    </script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+</body>
+
+</html>

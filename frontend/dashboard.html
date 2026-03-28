@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body style="background:#0f172a;color:white;font-family:sans-serif">
+
+<h1>Welcome to Dashboard 🚀</h1>
+
+<p id="user"></p>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+// 🔐 BLOCK ACCESS
+if (!localStorage.getItem("loggedIn")) {
+    window.location.href = "index.html";
+}
+
+// show username
+document.getElementById("user").innerText =
+    "Logged in as: " + localStorage.getItem("user");
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
