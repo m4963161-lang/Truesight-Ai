@@ -9,7 +9,10 @@ CORS(app)
 
 # ================= DB =================
 
-client = MongoClient("mongodb+srv://m4963161_db_user:BJ7vazSL1C6nTORe@cluster0.nmyolcj.mongodb.net/truesight?retryWrites=true&w=majority")
+client = MongoClient(
+    "mongodb+srv://m4963161_db_user:<db_password>@cluster0.nmyolcj.mongodb.net/?appName=Cluster0",
+    serverSelectionTimeoutMS=5000
+)
 
 db = client["truesight"]
 
@@ -63,26 +66,42 @@ def predict_image(filepath):
 
 @app.route("/detect_image", methods=["POST"])
 def detect_image():
-    file = request.files["file"]
-    email = request.form.get("username")
+    try:
+        print("REQUEST RECEIVED")
 
-    filename = file.filename
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
+        if "file" not in request.files:
+            print("No file in request")
+            return jsonify({"error": "No file uploaded"}), 400
 
-    prediction, confidence = predict_image(filepath)
+        file = request.files["file"]
+        email = request.form.get("username")
 
-    history.insert_one({
-        "email": email,
-        "filename": filename,
-        "prediction": prediction,
-        "confidence": confidence
-    })
+        print("File:", file.filename)
+        print("User:", email)
 
-    return jsonify({
-        "prediction": prediction,
-        "confidence": confidence
-    })
+        if file.filename == "":
+            return jsonify({"error": "Empty filename"}), 400
+
+        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(filepath)
+
+        prediction, confidence = predict_image(filepath)
+
+        history.insert_one({
+            "email": email,
+            "filename": file.filename,
+            "prediction": prediction,
+            "confidence": confidence
+        })
+
+        return jsonify({
+            "prediction": prediction,
+            "confidence": confidence
+        })
+
+    except Exception as e:
+        print("ERROR OCCURRED:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 # ================= HISTORY =================
 @app.route("/history/<email>", methods=["GET"])

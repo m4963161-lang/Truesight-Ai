@@ -163,7 +163,7 @@
     </div>
 
     <script>
-     window.onload = function () {
+   window.onload = function () {
     const user = localStorage.getItem("username");
 
     if (user) {
@@ -342,7 +342,7 @@ function signup() {
     const file = fileInput.files[0];
 
     if (!file) {
-        alert("Select image");
+        alert("Select image ❌");
         return;
     }
 
@@ -350,19 +350,27 @@ function signup() {
     formData.append("file", file);
     formData.append("username", localStorage.getItem("username"));
 
-    const res = await fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
-        method: "POST",
-        body: formData
-    });
+    try {
+        const res = await fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
+            method: "POST",
+            body: formData
+        });
 
-    const data = await res.json();
+        if (!res.ok) {
+            throw new Error("Server error");
+        }
 
-    // ✅ FIXED UI (NO ERROR)
-    document.getElementById("result").innerHTML = `
-        <img src="${URL.createObjectURL(file)}" width="200"><br>
-        <h3>${data.prediction}</h3>
-        <p>Confidence: ${data.confidence}</p>
-    `;
+        const data = await res.json();
+
+        document.getElementById("result").innerHTML = `
+            <img src="${URL.createObjectURL(file)}" width="200"><br>
+            <h3>${data.prediction}</h3>
+            <p>Confidence: ${data.confidence}</p>
+        `;
+    } catch (err) {
+        console.error(err);
+        alert("Analyze failed ❌");
+    }
 }
    
         function showSection(section) {
