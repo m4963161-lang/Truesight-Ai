@@ -272,8 +272,9 @@
 
 
     </script>
-    <script>
-       const API = "https://truesight-ai-6bv4.onrender.com";
+
+   <script>
+const API = "https://truesight-ai-6bv4.onrender.com";
 
 function signup() {
     const email = document.getElementById("email").value;
@@ -288,22 +289,15 @@ function signup() {
     })
     .then(res => res.json())
     .then(data => {
-        console.log(data);   // 🔥 DEBUG
-
-        if (data.error) {
-            alert(data.error);
-        } else {
-            alert("Signup success");
-            localStorage.setItem("username", email);
-        }
+        console.log(data);
+        alert(data.message || data.error);
     })
     .catch(err => {
-        console.error("Signup error:", err);
+        console.error(err);
         alert("Signup failed");
     });
 }
-    </script>
-
+</script>
     <script>
         function login() {
             const username = document.querySelector("input[placeholder='Username']").value;
