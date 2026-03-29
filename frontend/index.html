@@ -275,34 +275,36 @@
 
     <script>
         const API = "https://truesight-ai-6bv4.onrender.com";
+function signup() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-        function signup() {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
+    fetch(`${API}/signup`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert("Signup success");
 
-            if (!email || !password) {
-                alert("Enter all fields ❌");
-                return;
-            }
+            // ✅ SAVE USER
+            localStorage.setItem("username", email);
 
-            fetch(`${API}/signup`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ email, password })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    console.log(data);
-                    alert(data.message || data.error);
-                    localStorage.setItem("username", email);
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Signup failed ❌");
-                });
+            // ✅ SWITCH PAGE
+            showSection("homeSection");
         }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Signup failed");
+    });
+}
     </script>
     <script>
         async function login() {
