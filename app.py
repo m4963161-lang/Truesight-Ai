@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 import os
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -11,6 +12,19 @@ CORS(app)
 @app.route("/")
 def home():
     return "TrueSight AI Backend is Running 🚀"
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    data = request.get_json()
+
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Missing fields"}), 400
+
+    # temporary success (later DB)
+    return jsonify({"message": "Signup success"}), 200
 
 
 UPLOAD_FOLDER = "uploads"
@@ -56,23 +70,6 @@ def detect_image():
         "confidence": confidence
     })
    
-
-@app.route("/signup", methods=["POST"])
-def signup():
-    data = request.json
-    
-    if not data:
-        return jsonify({"error": "No data received"})
-    
-    if users.find_one({"email": data["email"]}):
-        return jsonify({"error": "User already exists"})
-    
-    users.insert_one({
-        "email": data["email"],
-        "password": data["password"]
-    })
-    
-    return jsonify({"message": "Signup success"})
 
 @app.route("/login", methods=["POST"])
 def login():

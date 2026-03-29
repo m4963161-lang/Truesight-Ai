@@ -172,7 +172,7 @@
     </script>
 
     <script>
-          const API = "https://truesight-ai-6bv4.onrender.com";
+         
 
         // Preview Image
         document.getElementById("fileInput").onchange = function () {
@@ -280,6 +280,11 @@ function signup() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
+    if (!email || !password) {
+        alert("Enter all fields ❌");
+        return;
+    }
+
     fetch(`${API}/signup`, {
         method: "POST",
         headers: {
@@ -291,10 +296,11 @@ function signup() {
     .then(data => {
         console.log(data);
         alert(data.message || data.error);
+        localStorage.setItem("username", email);
     })
     .catch(err => {
         console.error(err);
-        alert("Signup failed");
+        alert("Signup failed ❌");
     });
 }
 </script>
