@@ -140,10 +140,9 @@
     <div id="homeSection" style="display:none;">
         <h2>Upload Image</h2>
 
-        <input type="file" id="fileInput">
-        <button onclick="uploadImage()">Analyze</button>
-
-        <div id="result"></div>
+       <input type="file" id="fileInput">
+<button onclick="analyzeImage()">Analyze</button>
+<div id="result"></div>
     </div>
 
     <!-- HISTORY -->
@@ -275,6 +274,7 @@ function signup() {
     })
     .then(res => res.json())
     .then(data => {
+
         if (data.error) {
             alert(data.error);
         } else {
@@ -283,8 +283,9 @@ function signup() {
             // ✅ SAVE USER
             localStorage.setItem("username", email);
 
-            // ✅ SWITCH PAGE
-            showSection("homeSection");
+            // ✅ SHOW HOME
+            document.getElementById("loginSection").style.display = "none";
+            document.getElementById("homeSection").style.display = "block";
         }
     })
     .catch(err => {
@@ -292,12 +293,11 @@ function signup() {
         alert("Signup failed");
     });
 }
-   
-       async function login() {
+   async function login() {
     let email = document.getElementById("email").value;
     let password = document.getElementById("password").value;
 
-    let res = await fetch(`${API}/login`, {
+    let res = await fetch("https://truesight-ai-6bv4.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -310,10 +310,12 @@ function signup() {
     } else {
         alert("Login success");
 
+        // ✅ SAVE USER
         localStorage.setItem("username", email);
 
-        // 🚀 THIS IS THE FIX
-        showSection("homeSection");
+        // ✅ SHOW HOME PAGE
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("homeSection").style.display = "block";
     }
 }
     
@@ -335,33 +337,33 @@ function signup() {
         };
 
    
-        function analyzeImage() {
+     async function analyzeImage() {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
 
-            const fileInput = document.getElementById("fileInput");
-            const file = fileInput.files[0];
+    if (!file) {
+        alert("Select image");
+        return;
+    }
 
-            if (!file) {
-                alert("Please select a file");
-                return;
-            }
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("username", localStorage.getItem("username"));
 
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("username", localStorage.getItem("username"));
+    const res = await fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
+        method: "POST",
+        body: formData
+    });
 
-            fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
-                method: "POST",
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    console.log(data);
-                })
-                .catch(err => {
-                    console.error("Error:", err);
-                });
-        }
+    const data = await res.json();
 
+    // ✅ FIXED UI (NO ERROR)
+    document.getElementById("result").innerHTML = `
+        <img src="${URL.createObjectURL(file)}" width="200"><br>
+        <h3>${data.prediction}</h3>
+        <p>Confidence: ${data.confidence}</p>
+    `;
+}
    
         function showSection(section) {
     console.log("Switching to:", section); // 🔍 debug

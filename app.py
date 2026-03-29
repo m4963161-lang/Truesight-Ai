@@ -8,9 +8,12 @@ app = Flask(__name__)
 CORS(app)
 
 # ================= DB =================
-client = MongoClient("mongodb://localhost:27017/")
+
+client = MongoClient("mongodb+srv://m4963161_db_user:BJ7vazSL1C6nTORe@cluster0.nmyolcj.mongodb.net/truesight?retryWrites=true&w=majority")
+
 db = client["truesight"]
 
+collection = db["images"]
 users = db["users"]
 history = db["history"]
 
@@ -23,22 +26,15 @@ def home():
 @app.route("/signup", methods=["POST"])
 def signup():
     data = request.get_json()
-
     email = data.get("email")
     password = data.get("password")
 
-    if not email or not password:
-        return jsonify({"error": "Missing fields"}), 400
-
-    # Check if user exists
     if users.find_one({"email": email}):
-        return jsonify({"error": "User already exists"}), 400
-
-    hashed_password = generate_password_hash(password)
+        return jsonify({"error": "User already exists"})
 
     users.insert_one({
         "email": email,
-        "password": hashed_password
+        "password": password
     })
 
     return jsonify({"message": "Signup success"})
@@ -46,15 +42,15 @@ def signup():
 # ================= LOGIN =================
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
+    data = request.json
 
-    user = users.find_one({"email": data.get("email")})
+    user = users.find_one({
+        "email": data["email"],
+        "password": data["password"]
+    })
 
     if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    if not check_password_hash(user["password"], data.get("password")):
-        return jsonify({"error": "Wrong password"}), 401
+        return jsonify({"error": "Invalid credentials"})
 
     return jsonify({"message": "Login success"})
 
