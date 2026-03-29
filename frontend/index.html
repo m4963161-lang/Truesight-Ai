@@ -206,27 +206,7 @@
         }
 
         // Load History
-        async function loadHistory() {
 
-            let res = await fetch("https://truesight-ai-6bv4.onrender.com/history");
-            let data = await res.json();
-
-            let html = "<div class='card'><h2>History</h2>";
-
-            data.forEach(item => {
-                html += `
-            <div style="margin-bottom:20px;">
-                <img src="https://truesight-ai-6bv4.onrender.com/uploads/${item.filename}" width="150"><br>
-                <b>${item.filename}</b><br>
-                ${item.prediction} (${item.confidence})
-            </div>
-            `;
-            });
-
-            html += "</div>";
-
-            document.getElementById("content").innerHTML = html;
-        }
         function loadHistory() {
             const email = localStorage.getItem("username");
 
@@ -238,11 +218,12 @@
 
                     data.forEach(item => {
                         container.innerHTML += `
-                <div>
-                    <p>${item.filename}</p>
-                    <p>${item.prediction}</p>
-                    <p>${item.confidence}</p>
-                </div>
+               <div style="margin-bottom:20px;">
+    <img src="https://truesight-ai-6bv4.onrender.com/uploads/${item.filename}" width="200">
+    <p><b>${item.filename}</b></p>
+    <p>${item.prediction}</p>
+    <p>${item.confidence}</p>
+</div>
             `;
                     });
                 });
@@ -287,29 +268,28 @@
 
     </script>
     <script>
-        function signup() {
-            const username = document.querySelector("input[placeholder='Username']").value;
-            const password = document.querySelector("input[placeholder='Password']").value;
+        const API = "https://truesight-ai-6bv4.onrender.com";
 
-            fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
+        function signup() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            fetch(`${API}/signup`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    username: username,
-                    password: password
-                })
+                body: JSON.stringify({ email, password })
             })
                 .then(res => res.json())
                 .then(data => {
-                    alert(data.message);
-                    console.log(data);
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        alert("Signup success");
+                    }
                 })
-                .catch(err => {
-                    console.error(err);
-                    alert("Signup failed");
-                });
+                .catch(err => console.error(err));
         }
     </script>
 
@@ -344,12 +324,27 @@
         }
 
         function analyzeImage() {
-            if (!localStorage.getItem("loggedIn")) {
-                alert("Login required 🔐");
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Select file");
                 return;
             }
 
-            // existing code...
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("username", localStorage.getItem("username"));
+
+            fetch(`${API}/detect_image`, {
+                method: "POST",
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert("Prediction: " + data.prediction);
+                })
+                .catch(err => console.error(err));
         }
     </script>
 

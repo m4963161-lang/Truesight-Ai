@@ -17,10 +17,8 @@ UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 client = MongoClient("mongodb://localhost:27017/")
-collection = db["detections"]
 db = client["truesight"]
 users = db["users"]
-history = db["history"]
 
 def predict_image(filepath):
     # Dummy AI (for now)
@@ -71,7 +69,7 @@ def signup():
         "password": data["password"]
     })
     
-    return jsonify({"message": "Signup successful"})
+    return jsonify({"message": "Signup success"})
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -125,6 +123,8 @@ def detect_video():
         "frames": frames
     })
 
+
+history = db["history"]
 
 @app.route("/history/<email>", methods=["GET"])
 def get_history(email):
