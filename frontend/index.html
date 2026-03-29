@@ -369,7 +369,7 @@
             formData.append("file", file);
             formData.append("username", localStorage.getItem("username"));
 
-            fetch("http://127.0.0.1:5000/detect_image", {
+            fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
                 method: "POST",
                 body: formData
             })
