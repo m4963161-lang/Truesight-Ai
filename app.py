@@ -61,6 +61,9 @@ def detect_image():
 def signup():
     data = request.json
     
+    if not data:
+        return jsonify({"error": "No data received"})
+    
     if users.find_one({"email": data["email"]}):
         return jsonify({"error": "User already exists"})
     

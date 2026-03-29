@@ -130,8 +130,8 @@
             <div id="loginSection">
                 <h2>Login</h2>
 
-                <input placeholder="Username">
-                <input type="password" placeholder="Password">
+               <input type="email" id="email" placeholder="Enter Email">
+<input type="password" id="password" placeholder="Enter Password">">
 
                 <button onclick="login()">Login</button>
                 <button onclick="signup()">Signup</button>
@@ -162,6 +162,7 @@
     </div>
 
     <script>
+         
         // 🚫 Prevent using app without login
         if (!localStorage.getItem("username")) {
             alert("Login required 🔐");
@@ -171,6 +172,7 @@
     </script>
 
     <script>
+          const API = "https://truesight-ai-6bv4.onrender.com";
 
         // Preview Image
         document.getElementById("fileInput").onchange = function () {
@@ -219,7 +221,7 @@
                     data.forEach(item => {
                         container.innerHTML += `
                <div style="margin-bottom:20px;">
-    <img src="https://truesight-ai-6bv4.onrender.com/uploads/${item.filename}" width="200">
+<img src="https://truesight-ai-6bv4.onrender.com/uploads/${item.filename}">
     <p><b>${item.filename}</b></p>
     <p>${item.prediction}</p>
     <p>${item.confidence}</p>
@@ -233,19 +235,22 @@
             location.reload();
         }
 
-        async function login() {
-            let username = document.getElementById("username").value;
-            let password = document.getElementById("password").value;
+      async function login() {
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
 
-            let res = await fetch("https://truesight-ai-6bv4.onrender.com/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
-            });
+    let res = await fetch("https://truesight-ai-6bv4.onrender.com/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    });
 
-            let data = await res.json();
-            alert(data.message);
-        }
+    let data = await res.json();
+    alert(data.message);
+
+    // Save for history
+    localStorage.setItem("username", email);
+}
 
         async function loadStats() {
 
@@ -268,29 +273,35 @@
 
     </script>
     <script>
-        const API = "https://truesight-ai-6bv4.onrender.com";
+       const API = "https://truesight-ai-6bv4.onrender.com";
 
-        function signup() {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
+function signup() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-            fetch(`${API}/signup`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ email, password })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        alert("Signup success");
-                    }
-                })
-                .catch(err => console.error(err));
+    fetch(`${API}/signup`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(data);   // 🔥 DEBUG
+
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert("Signup success");
+            localStorage.setItem("username", email);
         }
+    })
+    .catch(err => {
+        console.error("Signup error:", err);
+        alert("Signup failed");
+    });
+}
     </script>
 
     <script>
