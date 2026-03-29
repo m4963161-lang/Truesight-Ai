@@ -227,6 +227,26 @@
 
             document.getElementById("content").innerHTML = html;
         }
+        function loadHistory() {
+            const email = localStorage.getItem("username");
+
+            fetch(`https://truesight-ai-6bv4.onrender.com/history/${email}`)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById("historyContainer");
+                    container.innerHTML = "";
+
+                    data.forEach(item => {
+                        container.innerHTML += `
+                <div>
+                    <p>${item.filename}</p>
+                    <p>${item.prediction}</p>
+                    <p>${item.confidence}</p>
+                </div>
+            `;
+                    });
+                });
+        }
 
         function showUpload() {
             location.reload();
@@ -369,17 +389,17 @@
             formData.append("file", file);
             formData.append("username", localStorage.getItem("username"));
 
-           fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
-    method: "POST",
-    body: formData
-})
-.then(res => res.json())
-.then(data => {
-    console.log(data);
-})
-.catch(err => {
-    console.error("Error:", err);
-});
+            fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
+                method: "POST",
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                });
         }
 
     </script>

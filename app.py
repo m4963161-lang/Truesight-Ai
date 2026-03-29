@@ -17,9 +17,10 @@ UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 client = MongoClient("mongodb://localhost:27017/")
-db = client["truesight_ai"]
 collection = db["detections"]
+db = client["truesight"]
 users = db["users"]
+history = db["history"]
 
 def predict_image(filepath):
     # Dummy AI (for now)
@@ -45,6 +46,13 @@ def detect_image():
         "confidence": confidence
     })
 
+    history.insert_one({
+    "email": request.form.get("username"),
+    "filename": filename,
+    "prediction": prediction,
+    "confidence": confidence
+})
+
     return jsonify({
         "prediction": prediction,
         "confidence": confidence
@@ -54,42 +62,30 @@ def detect_image():
 @app.route("/signup", methods=["POST"])
 def signup():
     data = request.json
-
+    
+    if users.find_one({"email": data["email"]}):
+        return jsonify({"error": "User already exists"})
+    
     users.insert_one({
-        "username": data["username"],
-        "password": data["password"],
-        "plan": "free",
-        "credits": 5
+        "email": data["email"],
+        "password": data["password"]
     })
+    
+    return jsonify({"message": "Signup successful"})
 
-    return jsonify({"message": "User created"})
 @app.route("/login", methods=["POST"])
 def login():
-  data = request.json
-
-  user = users.find_one({
-    "username": data["username"],
-    "password": data["password"]
-})
-
-  if user:
-
-    # 👉 FREE PLAN CHECK
-    if user.get("plan", "free") == "free":
-        if user.get("credits", 0) <= 0:
-            return jsonify({
-                "error": "Limit reached. Upgrade to premium 💎"
-            })
-
-    return jsonify({
-        "status": "success",
-        "plan": user.get("plan", "free"),
-        "credits": user.get("credits", 0)
+    data = request.json
+    
+    user = users.find_one({
+        "email": data["email"],
+        "password": data["password"]
     })
-
-  else:
-    return jsonify({"status": "fail"})
-
+    
+    if not user:
+        return jsonify({"error": "Invalid credentials"})
+    
+    return jsonify({"message": "Login success"})
 
 
 @app.route("/stats", methods=["GET"])
@@ -130,9 +126,9 @@ def detect_video():
     })
 
 
-@app.route("/history", methods=["GET"])
-def get_history():
-    data = list(collection.find({}, {"_id": 0}))
+@app.route("/history/<email>", methods=["GET"])
+def get_history(email):
+    data = list(history.find({"email": email}, {"_id": 0}))
     return jsonify(data)
 
 @app.route('/uploads/<filename>')
