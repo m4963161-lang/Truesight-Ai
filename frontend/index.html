@@ -192,7 +192,7 @@
             let formData = new FormData();
             formData.append("file", file);
 
-            let res = await fetch("http://127.0.0.1:5000/detect_image", {
+            let res = await fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
                 method: "POST",
                 body: formData
             });
@@ -208,7 +208,7 @@
         // Load History
         async function loadHistory() {
 
-            let res = await fetch("http://127.0.0.1:5000/history");
+            let res = await fetch("https://truesight-ai-6bv4.onrender.com/history");
             let data = await res.json();
 
             let html = "<div class='card'><h2>History</h2>";
@@ -216,7 +216,7 @@
             data.forEach(item => {
                 html += `
             <div style="margin-bottom:20px;">
-                <img src="http://127.0.0.1:5000/uploads/${item.filename}" width="150"><br>
+                <img src="https://truesight-ai-6bv4.onrender.com/uploads/${item.filename}" width="150"><br>
                 <b>${item.filename}</b><br>
                 ${item.prediction} (${item.confidence})
             </div>
@@ -236,7 +236,7 @@
             let username = document.getElementById("username").value;
             let password = document.getElementById("password").value;
 
-            let res = await fetch("http://127.0.0.1:5000/login", {
+            let res = await fetch("https://truesight-ai-6bv4.onrender.com/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password })
@@ -248,7 +248,7 @@
 
         async function loadStats() {
 
-            let res = await fetch("http://127.0.0.1:5000/stats");
+            let res = await fetch("https://truesight-ai-6bv4.onrender.com/stats");
             let data = await res.json();
 
             let html = `
@@ -271,7 +271,7 @@
             const username = document.querySelector("input[placeholder='Username']").value;
             const password = document.querySelector("input[placeholder='Password']").value;
 
-            fetch("http://127.0.0.1:5000/signup", {
+            fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -298,7 +298,7 @@
             const username = document.querySelector("input[placeholder='Username']").value;
             const password = document.querySelector("input[placeholder='Password']").value;
 
-            fetch("http://127.0.0.1:5000/login", {
+            fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password })
@@ -369,25 +369,17 @@
             formData.append("file", file);
             formData.append("username", localStorage.getItem("username"));
 
-            fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
-                method: "POST",
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-
-                    if (data.error) {
-                        alert(data.error);
-                        return;
-                    }
-
-                    document.getElementById("result").innerHTML =
-                        `Prediction: ${data.prediction} <br> Confidence: ${data.confidence}`;
-                })
-                .catch(err => {
-                    alert("Error analyzing image ❌");
-                    console.log(err);
-                });
+           fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
+    method: "POST",
+    body: formData
+})
+.then(res => res.json())
+.then(data => {
+    console.log(data);
+})
+.catch(err => {
+    console.error("Error:", err);
+});
         }
 
     </script>
@@ -416,7 +408,7 @@
 
     <script>
         function loadAnalytics() {
-            fetch("http://127.0.0.1:5000/history")
+            fetch("https://truesight-ai-6bv4.onrender.com/history")
                 .then(res => res.json())
                 .then(data => {
 
