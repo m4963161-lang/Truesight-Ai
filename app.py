@@ -10,9 +10,9 @@ CORS(app)
 # ================= DB =================
 
 client = MongoClient(
-    "mongodb+srv://m4963161_db_user:<db_password>@cluster0.nmyolcj.mongodb.net/?appName=Cluster0",
-    serverSelectionTimeoutMS=5000
+    "mongodb+srv://m4963161_db_user:Test123@cluster0.nmyolcj.mongodb.net/?retryWrites=true&w=majority"
 )
+
 
 db = client["truesight"]
 
@@ -67,20 +67,11 @@ def predict_image(filepath):
 @app.route("/detect_image", methods=["POST"])
 def detect_image():
     try:
-        print("REQUEST RECEIVED")
-
         if "file" not in request.files:
-            print("No file in request")
-            return jsonify({"error": "No file uploaded"}), 400
+            return jsonify({"error": "No file"}), 400
 
         file = request.files["file"]
         email = request.form.get("username")
-
-        print("File:", file.filename)
-        print("User:", email)
-
-        if file.filename == "":
-            return jsonify({"error": "Empty filename"}), 400
 
         filepath = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(filepath)
@@ -100,7 +91,7 @@ def detect_image():
         })
 
     except Exception as e:
-        print("ERROR OCCURRED:", str(e))
+        print("ERROR:", e)
         return jsonify({"error": str(e)}), 500
 
 # ================= HISTORY =================

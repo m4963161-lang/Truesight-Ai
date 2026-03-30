@@ -337,18 +337,17 @@ function signup() {
         };
 
    
-     async function analyzeImage() {
-    const fileInput = document.getElementById("fileInput");
-    const file = fileInput.files[0];
+    async function analyzeImage() {
+    const file = document.getElementById("fileInput").files[0];
 
     if (!file) {
-        alert("Select image ❌");
+        alert("Select image");
         return;
     }
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("username", localStorage.getItem("username"));
+    formData.append("username", localStorage.getItem("username") || "test@gmail.com");
 
     try {
         const res = await fetch("https://truesight-ai-6bv4.onrender.com/detect_image", {
@@ -356,23 +355,29 @@ function signup() {
             body: formData
         });
 
-        if (!res.ok) {
-            throw new Error("Server error");
-        }
+        console.log("STATUS:", res.status);
 
-        const data = await res.json();
+        const text = await res.text();
+        console.log("RESPONSE:", text);
+
+        const data = JSON.parse(text);
+
+        if (res.status !== 200) {
+            alert("Server error: " + text);
+            return;
+        }
 
         document.getElementById("result").innerHTML = `
             <img src="${URL.createObjectURL(file)}" width="200"><br>
             <h3>${data.prediction}</h3>
             <p>Confidence: ${data.confidence}</p>
         `;
+
     } catch (err) {
         console.error(err);
         alert("Analyze failed ❌");
     }
 }
-   
         function showSection(section) {
     console.log("Switching to:", section); // 🔍 debug
 
