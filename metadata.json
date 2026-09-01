@@ -1,0 +1,9 @@
+{
+  "name": "TrueSight AI",
+  "description": "A high-end forensic tool designed to distinguish between authentic and AI-generated media (images, videos, and audio) using advanced multimodal reasoning.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": []
+}
